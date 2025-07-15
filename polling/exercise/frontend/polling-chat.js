@@ -17,11 +17,44 @@ chat.addEventListener("submit", function (e) {
 async function postNewMsg(user, text) {
   // post to /poll a new message
   // write code here
+  const data = {
+    user,
+    text,
+  };
+
+  const options = {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  };
+  try {
+    const res = await fetch("/poll", options);
+    if (res.ok) {
+      const newMsg = await res.json();
+      allChat.push(newMsg); // add the new message to the local chat array
+      render(); // re-render the messages
+    } else {
+      console.error("Failed to post message:", res.statusText);
+    }
+  } catch (error) {
+    console.error("Error posting message:", error);
+  }
 }
 
 async function getNewMsgs() {
   // poll the server
   // write code here
+  try {
+    const res = await fetch("/poll");
+    const data = await res.json();
+    allChat = data;
+    render();
+    setTimeout(getNewMsgs, INTERVAL); // set up the next poll
+  } catch (error) {
+    console.error("Error fetching messages:", error);
+  }
 }
 
 function render() {
